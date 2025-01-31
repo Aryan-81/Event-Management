@@ -1,0 +1,77 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Django-specific files
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# Virtual environment directories
+venv/
+venv_*/
+env/
+env_*/
+.idea/
+.vscode/
+
+# Static and media files (can be generated automatically)
+static/
+media/
+
+# PyCharm IDE settings
+.idea/
+
+# VS Code settings
+.vscode/
+
+# MySQL and PostgreSQL database files
+*.sql
+*.db
+
+# Django migrations
+*/migrations/*
+
+# Local configuration files
+*.local
+*.sqlite3
+
+# Jupyter Notebook files
+.ipynb_checkpoints/
+
+# Coverage reports
+.coverage
+.coverage.*
+nosetests.xml
+test_coverage/
+
+# Django Secret Key file (for security)
+*.key
+
+# Docker-related files
+docker-compose.override.yml
+.docker/
+.dockerignore
+
+# IDE files
+*.swp
+*.swo
+*.swn
+.idea/
+
+# Backup files
+*~
+
+# Python dependencies
+*.egg
+*.egg-info
+dist/
+build/

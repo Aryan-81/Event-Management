@@ -7,9 +7,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from rest_framework.exceptions import ValidationError
 from mail.credentials import smtp_port,smtp_server,username,password,sender_email
+from server_stat.views import increment_mail_counter
 
 
-def generate_new_otp(length=4):
+def generate_new_otp(length=6):
     """Generate a new OTP with a specified length."""
     digits = '0123456789'
     otp = ''.join(random.choice(digits) for _ in range(length))
@@ -28,20 +29,24 @@ def sendmail(receiver_email, body):
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
             server.login(username, password)
-            server.sendmail(sender_email, receiver_email, message.as_string())
+            response = server.sendmail(sender_email, receiver_email, message.as_string())
+            increment_mail_counter()
+            
+
+        # If sendmail() returns an empty dictionary, the email was sent successfully
+        return True if not response else False
             
     except Exception as e:
         print(f"Error sending email: {e}")
-        return "not-sent"
-    return "sent"
+        return False
+    
 
 def validate_otp(email, otp):
     try:
-        otp_instance = OTP.objects.get(email=email, otp=otp, is_deleted=False)
-        if otp_instance.is_valid():
-            return True
-        else:
-            raise ValidationError('OTP has expired')
+        otp_instance = OTP.objects.get(email=email, otp=otp)
+        # Delete OTP after successful validation
+        OTP.objects.filter(email=email, otp=otp).delete()
+       
     except OTP.DoesNotExist:
         raise ValidationError('Invalid OTP')
 
@@ -53,32 +58,16 @@ class CreateOTPView(views.APIView):
             return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         email = email.lower()  # Ensure email is lowercase
+        # Mark any existing OTP as deleted (optional, if using is_deleted)
+        OTP.objects.filter(email=email).delete()  # You can use this to delete any existing OTPs
 
-        # Mark any existing OTP as deleted
-        OTP.objects.filter(email=email, is_deleted=False).update(is_deleted=True)
-        
         # Generate and save new OTP
         otp = generate_new_otp()
         otp_instance = OTP.objects.create(email=email, otp=otp)
         
         # Send OTP email
         email_body = f'Your OTP code is {otp}. It is valid for 10 minutes.'
-        sendmail(receiver_email=email, body=email_body)
-        
-        return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
-
-class ValidateOTPView(views.APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = OTPSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            otp = serializer.validated_data['otp']
-            
-            try:
-                validate_otp(email, otp)
-                return Response({'message': 'OTP is valid'}, status=status.HTTP_200_OK)
-            except ValidationError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    
+        if sendmail(receiver_email=email, body=email_body):
+            return Response({'message': 'OTP sent successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'OTP not sent'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
