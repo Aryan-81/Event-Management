@@ -2,20 +2,20 @@ from rest_framework import serializers
 from .models import Event
 
 class EventSerializer(serializers.Serializer):
-    Event_id = serializers.CharField(max_length=4, required=True)
-    Event_Name = serializers.CharField(max_length=50, required=True)
-    Event_des_short = serializers.CharField(max_length=200, required=True)
-    Event_des_long = serializers.CharField(max_length=1000, required=True)
-    Event_Head = serializers.CharField(max_length=50, required=True)
-    Event_Team = serializers.CharField(max_length=2000, required=True)
-    Contact_Phone_number1 = serializers.CharField(max_length=50, required=True)
-    Contact_Email1 = serializers.CharField(max_length=50, required=True)
+    Event_id = serializers.CharField(max_length=4, required=False)
+    Event_Name = serializers.CharField(max_length=50, required=False)
+    Event_des_short = serializers.CharField(max_length=200, required=False)
+    Event_des_long = serializers.CharField(max_length=1000, required=False)
+    Event_Head = serializers.CharField(max_length=50, required=False)
+    Event_Team = serializers.CharField(max_length=2000, required=False)
+    Contact_Phone_number1 = serializers.CharField(max_length=50, required=False)
+    Contact_Email1 = serializers.CharField(max_length=50, required=False)
     Contact_Phone_number2 = serializers.CharField(max_length=50, required=False)
     Contact_Email2 = serializers.CharField(max_length=50, required=False)
     Pre_Registered = serializers.BooleanField(default=False)
     Number_Registered = serializers.IntegerField(default=0)
     Space_Location = serializers.CharField(max_length=10, required=False)
-    Category=serializers.CharField(max_length=10,required=True)
+    Category=serializers.CharField(max_length=10,required=False)
 
     def create(self, validated_data):
         return Event.objects.create(**validated_data)

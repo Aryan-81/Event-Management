@@ -20,8 +20,21 @@ class Event(models.Model):
   Space_Location = models.CharField(max_length=10,blank=True)
   Category=models.CharField(max_length=10,blank=True)
 
-  
-  
   def __str__(self):
-    return f'{self.Event_Name}'
- 
+        return f'{self.Event_Name}'
+
+  def generate_event_id(self):
+      """Generate Event_id in a sequential format (e.g., 'E001', 'E002')"""
+      last_event = Event.objects.all().order_by('-Event_id').first()  # Get the last event by Event_id
+      if last_event:
+          last_event_number = int(last_event.Event_id[1:])  # Extract number from last event ID (assuming format E001, E002, ...)
+          next_event_number = last_event_number + 1
+      else:
+          next_event_number = 1  # Start from 1 if no events exist
+
+      return f'E{next_event_number:03d}'  # Format the ID as 'E001', 'E002', etc.
+
+  def save(self, *args, **kwargs):
+      if not self.Event_id:  # Only generate an Event_id if it's not already set
+          self.Event_id = self.generate_event_id()
+      super().save(*args, **kwargs)  # Call the parent save method

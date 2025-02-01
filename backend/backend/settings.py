@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'sch_profile',
     'event',
     'server_stat',
+    'register_event',
+    'event_head',
 ]
 
 MIDDLEWARE = [

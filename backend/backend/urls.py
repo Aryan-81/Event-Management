@@ -25,5 +25,7 @@ urlpatterns = [
     path('school/',include('sch_profile.urls')),
     path('event/',include('event.urls')),
     path('serverstat/',include('server_stat.urls')),
+    path('register_event/',include('register_event.urls')),
+    path('event_head/',include('event_head.urls')),
     
 ]
